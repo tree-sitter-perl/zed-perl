@@ -9,37 +9,6 @@ struct PerlExtension {
     did_find_server: bool,
 }
 
-fn copy_dir_all(src: impl Into<PathBuf>, dst: impl Into<PathBuf>) -> std::io::Result<()> {
-    let src = src.into();
-    let dst = dst.into();
-
-    fs::create_dir_all(&dst)?;
-    for entry in fs::read_dir(src)? {
-        let entry = entry?;
-        let ty = entry.file_type()?;
-        if ty.is_dir() {
-            copy_dir_all(entry.path(), dst.join(entry.file_name()))?;
-        } else {
-            fs::copy(entry.path(), dst.join(entry.file_name()))?;
-        }
-    }
-    Ok(())
-}
-
-// NOTE - this is very super duper evil
-fn move_oniguruma_super_evil() -> std::io::Result<()> {
-    let top_level_node_modules = PathBuf::from("node_modules");
-    let nested_oniguruma = top_level_node_modules
-        .join(PACKAGE_NAME)
-        .join("node_modules")
-        .join("vscode-oniguruma");
-    let onig_dir = top_level_node_modules.join("vscode-oniguruma");
-
-    copy_dir_all(onig_dir, nested_oniguruma)?;
-
-    Ok(())
-}
-
 impl PerlExtension {
     fn server_exists(&self) -> bool {
         fs::metadata(SERVER_PATH).map_or(false, |stat| stat.is_file())
@@ -72,9 +41,6 @@ impl PerlExtension {
                             "installed package '{PACKAGE_NAME}' did not contain expected path '{SERVER_PATH}'",
                         ))?;
                     }
-                    // TODO - don't be evil;
-                    // Create the symlink for node_modules
-                    let _ignored = move_oniguruma_super_evil();
                 }
                 Err(error) => {
                     if !self.server_exists() {
