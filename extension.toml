@@ -8,7 +8,7 @@ repository = "https://github.com/tree-sitter-perl/zed-perl"
 
 [grammars.perl]
 repository = "https://github.com/tree-sitter-perl/tree-sitter-perl"
-commit = "3a21d9cb2a20a062c17f8f53d5983fd473c4673c"
+commit = "70db420b20885ecd7268e5a710ebb3aeaef3a293"
 
 [language_servers.perlnavigator-server]
 name = "Perl Navigator"
