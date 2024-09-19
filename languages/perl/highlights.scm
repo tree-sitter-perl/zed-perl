@@ -1,21 +1,20 @@
-[ "use" "no" "require" ] @include
+[ "use" "no" "require" ] @keyword.include
+[ "package" "class" ] @keyword.include
 
-[ "if" "elsif" "unless" "else" ] @conditional
+[ "if" "elsif" "unless" "else" ] @keyword.conditional
 
-(conditional_expression [ "?" ":" ] @conditional.ternary)
+(conditional_expression [ "?" ":" ] @operator.conditional)
 
-[ "while" "until" "for" "foreach" ] @repeat
-("continue" @repeat (block))
+[ "while" "until" "for" "foreach" ] @keyword.repeat
+("continue" @keyword.repeat (block))
 
-[ "try" "catch" "finally" ] @exception
+[ "try" "catch" "finally" ] @keyword.exception
 
 "return" @keyword.return
 
 [ "sub" "method" ] @keyword.function
 
 [ "map" "grep" "sort" ] @function.builtin
-
-[ "package" "class" ] @include
 
 [
   "defer"
@@ -145,4 +144,9 @@
     "{" @punctuation.special
     "}" @punctuation.special))
 
+; (boolean) @boolean
 
+(
+ (method) @constructor
+ (#any-of? @constructor "new" "clone")
+)
