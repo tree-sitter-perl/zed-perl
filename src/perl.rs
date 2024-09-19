@@ -36,7 +36,7 @@ impl PerlExtension {
 
         let (platform, arch) = zed::current_platform();
         let asset_name = format!(
-            "perlnavigator-{os}-{arch}.zip",
+            "perlnavigator-{os}-{arch}",
             os = match platform {
                 zed::Os::Mac => "macos",
                 zed::Os::Linux => "linux",
@@ -54,11 +54,11 @@ impl PerlExtension {
         let asset = release
             .assets
             .iter()
-            .find(|asset| asset.name == asset_name)
-            .ok_or_else(|| format!("no asset found matching {:?}", asset_name))?;
+            .find(|asset| asset.name == format!("{asset_name}.zip"))
+            .ok_or_else(|| format!("no asset found matching {:?}.zip", asset_name))?;
 
         let version_dir = format!("perlnavigator-{}", release.version);
-        let binary_path = format!("{version_dir}/perlnavigator");
+        let binary_path = format!("{version_dir}/{asset_name}/perlnavigator");
 
         if !fs::metadata(&binary_path).map_or(false, |stat| stat.is_file()) {
             zed::set_language_server_installation_status(
@@ -72,6 +72,8 @@ impl PerlExtension {
                 zed::DownloadedFileType::Zip,
             )
             .map_err(|e| format!("failed to download file: {e}"))?;
+
+            zed::make_file_executable(&binary_path)?;
 
             let entries =
                 fs::read_dir(".").map_err(|e| format!("failed to list working directory {e}"))?;
