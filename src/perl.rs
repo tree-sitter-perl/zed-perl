@@ -58,7 +58,13 @@ impl PerlExtension {
             .ok_or_else(|| format!("no asset found matching {:?}.zip", asset_name))?;
 
         let version_dir = format!("perlnavigator-{}", release.version);
-        let binary_path = format!("{version_dir}/{asset_name}/perlnavigator");
+        let binary_path = format!(
+            "{version_dir}/{asset_name}/perlnavigator{extension}",
+            extension = match platform {
+                zed::Os::Mac | zed::Os::Linux => "",
+                zed::Os::Windows => ".exe",
+            }
+        );
 
         if !fs::metadata(&binary_path).map_or(false, |stat| stat.is_file()) {
             zed::set_language_server_installation_status(
