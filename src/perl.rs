@@ -1,4 +1,6 @@
 use std::fs;
+use zed::lsp::{Symbol, SymbolKind};
+use zed::{CodeLabel, CodeLabelSpan};
 use zed_extension_api::{self as zed, LanguageServerId, Result};
 
 struct PerlExtension {
@@ -112,6 +114,37 @@ impl zed::Extension for PerlExtension {
             command: self.language_server_binary_path(language_server_id, worktree)?,
             args: vec!["--stdio".to_string()],
             env: Default::default(),
+        })
+    }
+
+    fn label_for_symbol(
+        &self,
+        _language_server_id: &LanguageServerId,
+        symbol: Symbol,
+    ) -> Option<zed_extension_api::CodeLabel> {
+        let name = &symbol.name;
+        let (code, display_range, filter_range) = match symbol.kind {
+            SymbolKind::Package => {
+                let data_decl = "package ";
+                let code = format!("{data_decl}{name};");
+                let display_range = 0..data_decl.len() + name.len();
+                let filter_range = data_decl.len()..display_range.end;
+                (code, display_range, filter_range)
+            }
+            SymbolKind::Variable => {
+                let data_decl = "my ";
+                let code = format!("{data_decl}{name};");
+                let display_range = 0..data_decl.len() + name.len();
+                let filter_range = data_decl.len()..display_range.end;
+                (code, display_range, filter_range)
+            }
+            _ => return None,
+        };
+
+        Some(CodeLabel {
+            spans: vec![CodeLabelSpan::code_range(display_range)],
+            filter_range: filter_range.into(),
+            code,
         })
     }
 }
