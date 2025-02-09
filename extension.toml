@@ -1,7 +1,7 @@
 id = 'perl'
 name = 'Perl'
 description = "Perl support"
-version = '0.1.0'
+version = '0.1.1'
 schema_version = 1
 authors = ["Veesh <rabbiveesh@gmail.com>"]
 repository = "https://github.com/tree-sitter-perl/zed-perl"
