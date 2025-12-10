@@ -10,6 +10,10 @@ repository = "https://github.com/tree-sitter-perl/zed-perl"
 repository = "https://github.com/tree-sitter-perl/tree-sitter-perl"
 commit = "465983954cae2d2f984eae82de5ed5f11ca291dc"
 
+[grammars.pod]
+repository = "https://github.com/tree-sitter-perl/tree-sitter-pod"
+commit = "0bf8387987c21bf2f8ed41d2575a8f22b139687f"
+
 [language_servers.perlnavigator-server]
 name = "Perl Navigator"
 language = "Perl"

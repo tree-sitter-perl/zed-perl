@@ -40,7 +40,7 @@
 (eof_marker) @preproc
 (data_section) @comment
 
-(pod) @text
+(pod) @comment
 
 [
   (number)

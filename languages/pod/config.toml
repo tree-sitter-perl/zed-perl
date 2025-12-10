@@ -1,0 +1,4 @@
+name = "POD"
+grammar = "pod"
+path_suffixes = ["pod"]
+block_comment = ["=pod", "=cut"]
