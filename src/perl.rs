@@ -1,105 +1,64 @@
+use std::env;
 use std::fs;
 use zed_extension_api::{self as zed, LanguageServerId, settings::LspSettings, Result};
 
+const SERVER_PATH: &str = "node_modules/.bin/perlnavigator";
+const PACKAGE_NAME: &str = "perlnavigator-server";
+
 struct PerlExtension {
-    cached_binary_path: Option<String>,
+    did_find_server: bool,
 }
 
 impl PerlExtension {
-    fn language_server_binary_path(
-        &mut self,
-        language_server_id: &LanguageServerId,
-        worktree: &zed::Worktree,
-    ) -> Result<String> {
-        // don't bother installing if the user already has it somewheres
-        if let Some(path) = worktree.which("perlnavigator") {
-            return Ok(path);
-        }
+    fn server_exists(&self) -> bool {
+        fs::metadata(SERVER_PATH).map_or(false, |stat| stat.is_file())
+    }
 
-        if let Some(path) = &self.cached_binary_path {
-            if fs::metadata(path).map_or(false, |stat| stat.is_file()) {
-                return Ok(path.clone());
-            }
+    fn server_script_path(&mut self, language_server_id: &LanguageServerId) -> Result<String> {
+        let server_exists = self.server_exists();
+        if self.did_find_server && server_exists {
+            return Ok(SERVER_PATH.to_string());
         }
 
         zed::set_language_server_installation_status(
             language_server_id,
             &zed::LanguageServerInstallationStatus::CheckingForUpdate,
         );
-        let release = zed::latest_github_release(
-            "bscan/PerlNavigator",
-            zed::GithubReleaseOptions {
-                require_assets: true,
-                pre_release: false,
-            },
-        )?;
+        let version = zed::npm_package_latest_version(PACKAGE_NAME)?;
 
-        let (platform, arch) = zed::current_platform();
-        let asset_name = format!(
-            "perlnavigator-{os}-{arch}",
-            os = match platform {
-                zed::Os::Mac => "macos",
-                zed::Os::Linux => "linux",
-                zed::Os::Windows => "win",
-            },
-            arch = match arch {
-                zed::Architecture::X8664 => "x86_64",
-                zed::Architecture::Aarch64 =>
-                    return Err(format!("unsupported architecture: {arch:?}")),
-                zed::Architecture::X86 =>
-                    return Err(format!("unsupported architecture: {arch:?}")),
-            },
-        );
-
-        let asset = release
-            .assets
-            .iter()
-            .find(|asset| asset.name == format!("{asset_name}.zip"))
-            .ok_or_else(|| format!("no asset found matching {:?}.zip", asset_name))?;
-
-        let version_dir = format!("perlnavigator-{}", release.version);
-        let binary_path = format!(
-            "{version_dir}/{asset_name}/perlnavigator{extension}",
-            extension = match platform {
-                zed::Os::Mac | zed::Os::Linux => "",
-                zed::Os::Windows => ".exe",
-            }
-        );
-
-        if !fs::metadata(&binary_path).map_or(false, |stat| stat.is_file()) {
+        if !server_exists
+            || zed::npm_package_installed_version(PACKAGE_NAME)?.as_ref() != Some(&version)
+        {
             zed::set_language_server_installation_status(
                 language_server_id,
                 &zed::LanguageServerInstallationStatus::Downloading,
             );
-
-            zed::download_file(
-                &asset.download_url,
-                &version_dir,
-                zed::DownloadedFileType::Zip,
-            )
-            .map_err(|e| format!("failed to download file: {e}"))?;
-
-            zed::make_file_executable(&binary_path)?;
-
-            let entries =
-                fs::read_dir(".").map_err(|e| format!("failed to list working directory {e}"))?;
-            for entry in entries {
-                let entry = entry.map_err(|e| format!("failed to load directory entry {e}"))?;
-                if entry.file_name().to_str() != Some(&version_dir) {
-                    fs::remove_dir_all(entry.path()).ok();
+            let result = zed::npm_install_package(PACKAGE_NAME, &version);
+            match result {
+                Ok(()) => {
+                    if !self.server_exists() {
+                        Err(format!(
+                            "installed package '{PACKAGE_NAME}' did not contain expected path '{SERVER_PATH}'",
+                        ))?;
+                    }
+                }
+                Err(error) => {
+                    if !self.server_exists() {
+                        Err(error)?;
+                    }
                 }
             }
         }
 
-        self.cached_binary_path = Some(binary_path.clone());
-        Ok(binary_path)
+        self.did_find_server = true;
+        Ok(SERVER_PATH.to_string())
     }
 }
 
 impl zed::Extension for PerlExtension {
     fn new() -> Self {
         Self {
-            cached_binary_path: None,
+            did_find_server: false,
         }
     }
 
@@ -108,9 +67,26 @@ impl zed::Extension for PerlExtension {
         language_server_id: &LanguageServerId,
         worktree: &zed::Worktree,
     ) -> Result<zed::Command> {
+        // prefer a user-installed perlnavigator on PATH
+        if let Some(path) = worktree.which("perlnavigator") {
+            return Ok(zed::Command {
+                command: path,
+                args: vec!["--stdio".to_string()],
+                env: Default::default(),
+            });
+        }
+
+        let server_path = self.server_script_path(language_server_id)?;
         Ok(zed::Command {
-            command: self.language_server_binary_path(language_server_id, worktree)?,
-            args: vec!["--stdio".to_string()],
+            command: zed::node_binary_path()?,
+            args: vec![
+                env::current_dir()
+                    .unwrap()
+                    .join(&server_path)
+                    .to_string_lossy()
+                    .to_string(),
+                "--stdio".to_string(),
+            ],
             env: Default::default(),
         })
     }
