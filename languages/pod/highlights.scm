@@ -1,4 +1,9 @@
-[(pod_command) (command) (cut_command)] @keyword
+[(pod_command)
+ (command)
+ (cut_command)
+ (begin_command)
+ (end_command)
+ (for_command)] @keyword
 
 (command_paragraph
   (command) @keyword
@@ -26,6 +31,12 @@
   (content) @string)
 
 (verbatim_paragraph (content) @embedded)
+
+(begin_paragraph (format_name) @string.special)
+(for_paragraph (format_name) @string.special)
+
+(begin_paragraph (data) @embedded)
+(for_paragraph (content) @embedded)
 
 (interior_sequence
   (sequence_letter) @punctuation.special
@@ -61,7 +72,7 @@
   (#eq? @punctuation.special "X")
   (content) @tag)
 
-(interior_sequence
+(escape_sequence
   (sequence_letter) @punctuation.special
-  (#eq? @punctuation.special "E")
+  ["<" ">"] @punctuation.bracket
   (content) @string.escape)
