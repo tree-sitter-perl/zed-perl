@@ -1,5 +1,11 @@
 # A perl extension for Zed
 
+## Installation
+
+Rust must be installed via [rustup](https://rustup.rs) for dev extensions to work.
+
+Clone the repository, then open Zed's extensions page and click "Install Dev Extension". Select the cloned directory and Zed will build and load the extension automatically.
+
 Currently, this is a work in progress.
 
 The grammar is set up with our [tree-sitter parser](https://github.com/tree-sitter-perl/tree-sitter-perl); queries are constantly being improved.

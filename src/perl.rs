@@ -1,5 +1,6 @@
 use std::env;
 use std::fs;
+
 use zed_extension_api::{self as zed, LanguageServerId, settings::LspSettings, Result};
 
 const SERVER_PATH: &str = "node_modules/.bin/perlnavigator";
@@ -16,6 +17,7 @@ impl PerlExtension {
 
     fn server_script_path(&mut self, language_server_id: &LanguageServerId) -> Result<String> {
         let server_exists = self.server_exists();
+
         if self.did_find_server && server_exists {
             return Ok(SERVER_PATH.to_string());
         }
@@ -24,6 +26,7 @@ impl PerlExtension {
             language_server_id,
             &zed::LanguageServerInstallationStatus::CheckingForUpdate,
         );
+
         let version = zed::npm_package_latest_version(PACKAGE_NAME)?;
 
         if !server_exists
@@ -33,6 +36,7 @@ impl PerlExtension {
                 language_server_id,
                 &zed::LanguageServerInstallationStatus::Downloading,
             );
+
             let result = zed::npm_install_package(PACKAGE_NAME, &version);
             match result {
                 Ok(()) => {
@@ -77,6 +81,7 @@ impl zed::Extension for PerlExtension {
         }
 
         let server_path = self.server_script_path(language_server_id)?;
+
         Ok(zed::Command {
             command: zed::node_binary_path()?,
             args: vec![

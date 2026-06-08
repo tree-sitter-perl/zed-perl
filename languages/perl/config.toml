@@ -2,7 +2,7 @@ name = "Perl"
 grammar = "perl"
 first_line_pattern = '^#!.*\bperl\b'
 path_suffixes = ["pl", "pm", "t"]
-line_comments = ["#"]
+line_comments = ["# "]
 autoclose_before = "\"'`}])"
 brackets = [
     { start = "{", end = "}", close = true, newline = false },
