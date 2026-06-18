@@ -49,8 +49,8 @@ First, make the binary available in one of two ways:
   cargo install perl-lsp
   ```
 - **Let the extension download a prebuilt binary** by enabling the `download`
-  setting (binaries are published for Linux x86_64, macOS Intel/Apple Silicon,
-  and Windows x86_64):
+  setting (binaries are published for Linux x86_64/aarch64, macOS Intel/Apple
+  Silicon, and Windows x86_64):
   ```json
   {
     "lsp": {
