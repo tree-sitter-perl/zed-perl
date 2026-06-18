@@ -1,7 +1,7 @@
 id = 'perl'
 name = 'Perl'
 description = "Perl support"
-version = '0.3.0'
+version = '0.4.0'
 schema_version = 1
 authors = ["Veesh <rabbiveesh@gmail.com>"]
 repository = "https://github.com/tree-sitter-perl/zed-perl"
@@ -17,5 +17,14 @@ rev = "cd1931314beafeebc957964c65802961e283411e"
 
 [language_servers.perlnavigator-server]
 name = "Perl Navigator"
+language = "Perl"
+
+# Opt-in alternative to Perl Navigator. Stays dormant unless you either have
+# `perl-lsp` on your PATH (e.g. `cargo install perl-lsp`) or enable the managed
+# download with `"lsp": { "perl-lsp": { "settings": { "download": true } } }`.
+# Select it via `"languages": { "Perl": { "language_servers":
+# ["perl-lsp", "!perlnavigator-server", "..."] } }`.
+[language_servers.perl-lsp]
+name = "Perl LSP"
 language = "Perl"
 
