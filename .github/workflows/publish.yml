@@ -1,0 +1,27 @@
+name: Publish to Zed Extensions
+
+# Opens a PR against zed-industries/extensions bumping the `perl` submodule and
+# version whenever a version tag is pushed. Tag a release (matching the version
+# in extension.toml) to trigger it, e.g. `git tag v0.4.0 && git push --tags`.
+#
+# Requires a repository secret `COMMITTER_TOKEN`: a personal access token with
+# `repo` and `workflow` scopes, used to push to the fork and open the PR.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    name: Bump zed-industries/extensions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: huacnlee/zed-extension-action@v1
+        with:
+          # Registry id is `perl`, not the repo name (`zed-perl`); must be set
+          # explicitly or the action targets the wrong extension.
+          extension-name: perl
+          push-to: rabbiveesh/extensions
+        env:
+          COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
