@@ -144,7 +144,7 @@
     "{" @punctuation.special
     "}" @punctuation.special))
 
-; (boolean) @boolean
+(boolean) @boolean
 
 (
  (method) @constructor
