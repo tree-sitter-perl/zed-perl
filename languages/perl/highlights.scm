@@ -72,6 +72,8 @@
  (regexp_content)
 ] @string.regex
 
+(match_regexp_modifiers) @string.regex.modifiers
+
 (autoquoted_bareword) @string.special
 
 (use_statement (package) @type)
