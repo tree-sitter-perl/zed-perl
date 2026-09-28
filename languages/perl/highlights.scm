@@ -73,6 +73,7 @@
 ] @string.regex
 
 (match_regexp_modifiers) @string.regex.modifiers
+(highlight_regexp_modifiers) @string.regex.modifiers
 
 (autoquoted_bareword) @string.special
 
