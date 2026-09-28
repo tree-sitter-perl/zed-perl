@@ -69,6 +69,7 @@
 [
  (quoted_regexp)
  (match_regexp)
+ (substitution_regexp)
  (regexp_content)
 ] @string.regex
 
