@@ -112,6 +112,8 @@
   (#match? @variable.special "^((ENV|ARGV|INC|ARGVOUT|SIG|STDIN|STDOUT|STDERR)|[_ab]|\\W|\\d+|\\^.*)$")
 )
 
+(filehandle) @variable.scalar
+
 (scalar) @variable.scalar
 (scalar_deref_expression [ "$" "*"] @variable.scalar)
 [(array) (arraylen)] @variable.array
